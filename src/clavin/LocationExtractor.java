@@ -38,7 +38,11 @@ public class LocationExtractor {
 	
 	public static void main(String[] args) throws Exception{
 		LocationExtractor extractor = new LocationExtractor("lib/IndexDirectory");
-		extractor.getLocationInfoFromFile(new File("acadis_summary.pdf"));
+		List<GeoData> temp = extractor.getLocationInfoFromFile(new File("PLC-24-proceedings-GD-34.pdf"));
+		for(GeoData d: temp)
+		{
+			System.out.println(d.getGeoName()+":"+d.getLatitide()+","+d.getLongitutde());
+		}
 	}
 	
 	List<GeoData> getLocationInfoFromFile(File file) throws Exception
@@ -70,7 +74,7 @@ public class LocationExtractor {
 			double latitude = name.getLatitude();
 			double longitude = name.getLongitude();
 			
-			if(!dups.contains(name)){
+			if(!dups.contains(locName)){
 				GeoData temp = new GeoData(locName, latitude, longitude);
 				data.add(temp);
 				dups.add(locName);
@@ -91,7 +95,7 @@ public class LocationExtractor {
 		Parser parser = new AutoDetectParser();
 		Metadata metaData = new Metadata();
 		ParseContext parseContext = new ParseContext();
-		BodyContentHandler handler =  new BodyContentHandler();
+		BodyContentHandler handler =  new BodyContentHandler(1000000000);
         FileInputStream is = new FileInputStream(file);
         parser.parse(is, handler, metaData, parseContext);
         System.out.println("Content: "+ handler.toString());
