@@ -46,10 +46,42 @@ class pageRankUrl {
         return weight;
     }
 }
+
+class linkNode {
+    private String linkA;
+    private String linkB;
+    private double weight;
+    public linkNode (String linkA, String linkB, double weight) {
+        this.linkA = linkA;
+        this.linkB = linkB;
+        this.weight = weight;
+    }
+    public String getLinkA() {
+        return linkA;
+    }
+    public String getLinkB() {
+        return linkB;
+    }
+    public double getWeight() {
+        return weight;
+    }
+    public void setWeight(double weight) {
+        this.weight = weight;
+    }
+}
+
 public class SolrjPopulator {
     public static void main(String[] args) throws IOException, SolrServerException {
+
+        if(args.length < 3) {
+            System.out.println("Usage:");
+            System.out.println("java SolrjPopulator <segment_path> <linkdb_data_path> <content_dump_dir>");
+            System.exit(0);
+        }
+
         Map<String, String> urlDidMap = new HashMap<String, String>();
         ArrayList<pageRankUrl> graph = new ArrayList<pageRankUrl>();
+        ArrayList<linkNode> linkGraph = new ArrayList<linkNode>();
         try {
             Configuration confForReader = NutchConfiguration.create();
             FileSystem fs = FileSystem.get(confForReader);
@@ -73,10 +105,10 @@ public class SolrjPopulator {
         } catch (Exception e) {
             e.printStackTrace();
         }
-//        for (Map.Entry<String, String> entry : urlDidMap.entrySet())
-//        {
-//                System.out.println(entry.getKey() + "/" + entry.getValue());
-//        }
+        //        for (Map.Entry<String, String> entry : urlDidMap.entrySet())
+        //        {
+        //                System.out.println(entry.getKey() + "/" + entry.getValue());
+        //        }
 
         String urlString = "http://localhost:8983/solr"; 
         SolrServer solr = new HttpSolrServer(urlString);
@@ -94,7 +126,7 @@ public class SolrjPopulator {
                 if (urlLast.equals(fileBasename) || fileBasename.equals(urlLast + ".html")
                         || fileBasename.equals(urlLast + ".html")) {
                     urlDidMap.put(key, currDocID); 
-                }
+                        }
             }
             ContentStreamUpdateRequest up = new ContentStreamUpdateRequest("/update/extract");
 
@@ -148,25 +180,85 @@ public class SolrjPopulator {
             up.setAction(AbstractUpdateRequest.ACTION.COMMIT, true, true);
             System.out.println(currDocID + " " + files[i]);
             try {
-            solr.request(up);
+                solr.request(up);
             } catch (Exception e) {
                 System.out.println("Exception while trying to index " + currDocID + " " + files[i]);
                 e.printStackTrace();
             }
         } 
 
-        PrintWriter writer = new PrintWriter("temp.txt", "UTF-8");
         for (pageRankUrl temp : graph) {
             if (urlDidMap.containsKey(temp.getInLink()) && urlDidMap.containsKey(temp.getBaseUrl())
                     && !urlDidMap.get(temp.getInLink()).equals("dummyDid")
-                    && !urlDidMap.get(temp.getBaseUrl()).equals("dummyDid")) {
-                writer.println(urlDidMap.get(temp.getInLink()) + " " + urlDidMap.get(temp.getBaseUrl()) + " " + temp.getWeight());
-                    }
+                    && !urlDidMap.get(temp.getBaseUrl()).equals("dummyDid")) 
+            {
+                linkGraph.add(new linkNode(
+                            urlDidMap.get(temp.getInLink()),
+                            urlDidMap.get(temp.getBaseUrl()),
+                            temp.getWeight()
+                            )
+                        );
+            }
+        }
+
+        SolrQuery myQuery = new SolrQuery("*:*");
+        myQuery.setRows(13000);
+        QueryResponse rsp1 = solr.query(myQuery);
+        SolrDocumentList results = rsp1.getResults();
+        SolrDocumentList results2 = rsp1.getResults();
+        System.out.println("--------------------------------------------------------------------------------------------------------------");
+        for (int k=0; k < results.size(); k++) {
+            String docId1 = results.get(k).getFieldValue("id").toString();
+            if (results.get(k).getFieldValues("science_keywords_s") != null) {
+                String scienceString1 = results.get(k).getFieldValues("science_keywords_s").toString();
+                System.out.println(docId1 + " " + scienceString1);
+                for (int k2=0; k2 < results2.size(); k2++) {
+                    String docId2 = results.get(k2).getFieldValue("id").toString();
+                    if (results.get(k2).getFieldValues("science_keywords_s") != null && !docId1.equals(docId2)) {
+                        String scienceString2 = results.get(k2).getFieldValues("science_keywords_s").toString();
+                        Set<String> docSet1 = new HashSet<String>(Arrays.asList(scienceString1.trim().split(",")));
+                        Set<String> docSet2 = new HashSet<String>(Arrays.asList(scienceString2.trim().split(",")));
+                        int minLength = (docSet1.size() < docSet2.size()) ? docSet1.size() : docSet2.size();
+                        docSet1.retainAll(docSet2);
+                        if (docSet1.size() >= minLength * 0.5) {
+                            int tempI = 0;
+                            Boolean a2b = false;
+                            Boolean b2a = false;
+                            for (linkNode temp : linkGraph) {
+                                if (temp.getLinkA().equals(docId1) && temp.getLinkB().equals(docId2)) {
+                                    double tempWeight = 1.5;
+                                    System.out.println("found the linked ones " + docId1 + " " + docId2 + " " + tempWeight + " " + temp.getWeight() + " " + (temp.getWeight() + (Double)0.5));
+                                    linkGraph.set(tempI, new linkNode(docId1, docId2, tempWeight));
+                                    a2b = true;
+                                }
+                                if (temp.getLinkA().equals(docId2) && temp.getLinkB().equals(docId1)) {
+                                    double tempWeight = 1.5;
+                                    System.out.println("found the linked ones " + docId2 + " " + docId1 + " " + tempWeight + " " + temp.getWeight() + " " + (temp.getWeight() + (Double)0.5));
+                                    linkGraph.set(tempI, new linkNode(docId2, docId1, tempWeight));
+                                    b2a = true;
+                                }
+                                tempI++;
+                            }
+                            if (!a2b) {
+                                linkGraph.add(new linkNode(docId1, docId2, 0.5));
+                            }
+                            if (!b2a) {
+                                linkGraph.add(new linkNode(docId2, docId1, 0.5));
+                            }
+                        }
+                    } 
+                }
+            } 
+        } 
+
+        PrintWriter writer = new PrintWriter("temp.txt", "UTF-8");
+        for (linkNode temp : linkGraph) {
+            writer.println(temp.getLinkA() + " " + temp.getLinkB() + " " + temp.getWeight());
         }
         writer.close();
 
         QueryResponse rsp = solr.query(new SolrQuery("*:*"));
-        SolrDocumentList results = rsp.getResults();
+        results = rsp.getResults();
         System.out.println("--------------------------------------------------------------------------------------------------------------");
         for (int k=0; k < results.size(); k++) {
             System.out.println(results.get(k).getFieldNames());
