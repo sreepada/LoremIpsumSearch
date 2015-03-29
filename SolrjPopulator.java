@@ -1,43 +1,32 @@
-import java.io.File; 
-import java.io.IOException;
+import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
-
-import org.apache.solr.client.solrj.request.AbstractUpdateRequest;
-import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.request.AbstractUpdateRequest;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
-import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.client.solrj.response.QueryResponse;
+
 import org.apache.hadoop.conf.*;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.FileSystem;
-
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.SequenceFile;
-
 import org.apache.nutch.util.NutchConfiguration;
 import org.apache.nutch.crawl.Inlinks;
 import org.apache.nutch.crawl.Inlink;
-import java.util.Iterator;
-import java.util.ArrayList;
-import java.util.*;
 
-import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.response.QueryResponse; 
-import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.common.SolrInputDocument;
-import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
-import org.apache.solr.common.SolrDocumentList;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
+
+import java.util.*;
+import java.io.*;
 
 import org.jsoup.Jsoup;
 import org.jsoup.helper.Validate;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
-import java.io.*;
-import org.apache.commons.io.filefilter.WildcardFileFilter;
 
 class pageRankUrl {
     private String inLink;
