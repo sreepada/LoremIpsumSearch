@@ -53,14 +53,18 @@ public class SolrjPopulator {
         try {
             Configuration confForReader = NutchConfiguration.create();
             FileSystem fs = FileSystem.get(confForReader);
-            Path segmentFile = new Path("/home/sreepada/Documents/CSCI_572/crawl_backup/crawl_old/linkdb/current/part-00000/data");
-            SequenceFile.Reader reader = new SequenceFile.Reader(fs, segmentFile, confForReader);
+            Path segmentFile = new Path(args[0]);
+            SequenceFile.Reader segmentReader = new SequenceFile.Reader(fs, segmentFile, confForReader);
             Text segmentKey = new Text();
-            Inlinks segmentInLink = new Inlinks();
-            // Loop through sequence files to get Content metadata of already
-            while (reader.next(segmentKey, segmentInLink)) {
-                Iterator<Inlink> currLink = segmentInLink.iterator();
+            while (segmentReader.next(segmentKey)) {
                 urlDidMap.put(segmentKey.toString(), "dummyDid");
+            }
+
+            Path linkFile = new Path(args[1]);
+            SequenceFile.Reader linkReader = new SequenceFile.Reader(fs, linkFile, confForReader);
+            Inlinks segmentInLink = new Inlinks();
+            while (linkReader.next(segmentKey, segmentInLink)) {
+                Iterator<Inlink> currLink = segmentInLink.iterator();
                 while(currLink.hasNext()) {
                     String somehting = (currLink.next().toString().split(" ")[1]).trim();
                     graph.add(new pageRankUrl(somehting, segmentKey.toString()));
@@ -69,29 +73,32 @@ public class SolrjPopulator {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        // for (pageRankUrl temp : graph) {
-        //     System.out.println(temp.getInLink() + " " + temp.getBaseUrl());
-        // }
-        // System.exit(0);
+//        for (Map.Entry<String, String> entry : urlDidMap.entrySet())
+//        {
+//                System.out.println(entry.getKey() + "/" + entry.getValue());
+//        }
 
         String urlString = "http://localhost:8983/solr"; 
         SolrServer solr = new HttpSolrServer(urlString);
 
-        File dir = new File("/home/sreepada/Documents/CSCI_572/crawl_backup/dumpDir");
-        FileFilter fileFilter = new WildcardFileFilter("*.html");
+        File dir = new File(args[2]);
+        FileFilter fileFilter = new WildcardFileFilter("*.html*");
         File[] files = dir.listFiles(fileFilter);
         String currDocID;
         for (int i = 0; i < files.length; i++)
         {
             currDocID = "html-" + i;
             for(String key : urlDidMap.keySet()) {
-                if (key.substring(key.lastIndexOf("/") + 1).equals(files[i].toString().substring(files[i].toString().lastIndexOf("/") + 1))) {
+                String urlLast = key.substring(key.lastIndexOf("/") + 1);
+                String fileBasename = files[i].toString().substring(files[i].toString().lastIndexOf("/") + 1);
+                if (urlLast.equals(fileBasename) || fileBasename.equals(urlLast + ".html")
+                        || fileBasename.equals(urlLast + ".html")) {
                     urlDidMap.put(key, currDocID); 
                 }
             }
             ContentStreamUpdateRequest up = new ContentStreamUpdateRequest("/update/extract");
 
-            up.addFile(new File(files[i].toString()), "text/plain");
+            up.addFile(new File(files[i].toString()), "text/html");
 
             Document doc = Jsoup.parse(files[i], "UTF-8", "http://example.com/");
             Elements elements;
@@ -121,14 +128,15 @@ public class SolrjPopulator {
                     value = value.split(" ")[0];
                 }
                 //                System.out.println("key=" + key + "\tvalue=" + value);
-                if (key.contains("northernmost_l")) 
-                    bboxValues[2] = Double.parseDouble(value);
+                if (key.contains("northernmost_l")) {
+                    bboxValues[2] = Double.parseDouble(value.trim().split(" ")[0]);
+                }
                 else if (key.contains("southernmost_l"))
-                    bboxValues[3] = Double.parseDouble(value);
+                    bboxValues[3] = Double.parseDouble(value.trim().split(" ")[0]);
                 else if (key.contains("westernmost_l"))
-                    bboxValues[0] = Double.parseDouble(value);
+                    bboxValues[0] = Double.parseDouble(value.trim().split(" ")[0]);
                 else if (key.contains("easternmost_l"))
-                    bboxValues[1] = Double.parseDouble(value);
+                    bboxValues[1] = Double.parseDouble(value.trim().split(" ")[0]);
                 else
                     up.setParam("literal." + key, value);
             }
@@ -138,7 +146,13 @@ public class SolrjPopulator {
             }
             up.setParam("fmap.content", "attr_content");
             up.setAction(AbstractUpdateRequest.ACTION.COMMIT, true, true);
+            System.out.println(currDocID + " " + files[i]);
+            try {
             solr.request(up);
+            } catch (Exception e) {
+                System.out.println("Exception while trying to index " + currDocID + " " + files[i]);
+                e.printStackTrace();
+            }
         } 
 
         PrintWriter writer = new PrintWriter("temp.txt", "UTF-8");
