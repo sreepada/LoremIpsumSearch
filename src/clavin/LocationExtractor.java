@@ -47,7 +47,7 @@ public class LocationExtractor {
 	
 	List<GeoData> getLocationInfoFromFile(File file) throws Exception
 	{
-		String input = this.tikaReadFileContent(file);
+		String input = LocationExtractor.tikaReadFileContent(file);
 		return parser(input);
 		
 	}
@@ -90,7 +90,7 @@ public class LocationExtractor {
 	 * Function reads content from file using tika parser.
 	 * returns a string containing data.		
 	 */
-	String tikaReadFileContent(File file) throws IOException, SAXException, TikaException
+	static String tikaReadFileContent(File file) throws IOException, SAXException, TikaException
 	{
 		Parser parser = new AutoDetectParser();
 		Metadata metaData = new Metadata();
