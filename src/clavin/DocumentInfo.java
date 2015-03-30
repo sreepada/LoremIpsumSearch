@@ -36,7 +36,7 @@ public class DocumentInfo {
 			double tf = 0.5 + ((0.5*wordCount.get(word))/maxFreq);
 			
 			double idf= (double)numberOfDocs/(1+IDF.get(word));
-			System.out.println(word+" "+IDF.get(word)+" "+tf*idf);
+			
 			this.tfidf.put(word, tf*idf);
 		}
 	}

@@ -72,7 +72,7 @@ public class TFIDF {
 	{
 		for(String key: this.documentDetails.keySet())
 		{
-			System.out.println(key);
+			
 			DocumentInfo doc = this.documentDetails.get(key);
 			doc.computeTFIDF(this.numberOfDocs, this.IDF);
 		}
