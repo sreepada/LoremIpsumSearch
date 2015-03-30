@@ -95,7 +95,7 @@ public class LocationExtractor {
 		Parser parser = new AutoDetectParser();
 		Metadata metaData = new Metadata();
 		ParseContext parseContext = new ParseContext();
-		BodyContentHandler handler =  new BodyContentHandler(1000000000);
+		BodyContentHandler handler =  new BodyContentHandler(2147483647);
         FileInputStream is = new FileInputStream(file);
         parser.parse(is, handler, metaData, parseContext);
         System.out.println("Content: "+ handler.toString());
