@@ -4,7 +4,7 @@ import networkx as nx
 D = nx.DiGraph()
 
 ltpl = list()
-with open('input.txt','r') as fp:
+with open('../temp.txt','r') as fp:
 	for line in fp:
 		frm,to,w = line.split(' ',3)
 		tpl = (frm,to,float(w))
@@ -15,4 +15,4 @@ with open('input.txt','r') as fp:
 pr = nx.pagerank(D)
 
 for x in pr:
-	print x + ' ' + str(pr[x])
+	print x + ' ' + str(pr[x] * 1000)
