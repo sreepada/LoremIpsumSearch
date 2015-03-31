@@ -17,7 +17,10 @@ region of security interests
 
 Note: ^3 will only change the ranking, but not the documents retrieved given a query
 
-4) check once get gets loaded
+4)http://localhost:8983/solr/select?q=(text:watts AND per AND square AND meter) OR (text:wpm2 OR wpm)
+http://localhost:8983/solr/select?q=text:ppm OR (text:parts AND per AND million)
+http://localhost:8983/solr/select?q=text:OHC OR (text:ocean AND heat AND content)
+http://localhost:8983/solr/select?q=text:satellite AND cloud
 
 5)
 Sea bird
