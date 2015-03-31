@@ -1,6 +1,7 @@
 1) time based trend in oil , iron
-http://localhost:8983/solr/select?q=text:arctic and ((text:"oil exploration"~10) or (text:"iron") or (text:oil))
-http://localhost:8983/solr/select?q=text:arctic and ((text:"oil exploration"~10) or (text:"iron") or (text:oil))&group=true&group.field=location(s)_s
+ a) http://localhost:8983/solr/select?q=text:arctic and ((text:"oil exploration"~10) or (text:"iron") or (text:oil))
+ b) http://localhost:8983/solr/select?q=text:arctic and ((text:"oil exploration"~1) or (text:"iron") or (text:oil))&group=true&group.field=location_s__s
+
 check if there is trend by comparing dates
 
 get location and check if it is in same location
@@ -10,14 +11,22 @@ http://localhost:8983/solr/select?q=*:*&group=true&group.field=location(s)_s
 
 3)
 region of security interests
-http://localhost:8983/solr/select?q=(text:military base OR security OR aircraft) AND (text:iron OR oil)
+ a) http://localhost:8983/solr/select?q=(text:military base OR security OR aircraft) AND (text:iron OR oil)
+ b) http://localhost:8983/solr/select?q=(text:military base OR security) AND (text:ship) AND (text:iron OR oil)
+ c) http://localhost:8983/solr/select?q=text:arctic AND war AND oil
 
-
-3)
-http://localhost:8983/solr/select?q=text:ocean OR arctic OR region&fl=id,location(s)_s
+Note: ^3 will only change the ranking, but not the documents retrieved given a query
 
 4) check once get gets loaded
 
 5)
-Sea bird and sea cats
+Sea bird
 http://localhost:8983/solr/select?q=*:*&fq=+n_coordinate:[58 TO 60]  +w_coordinate:[-178 TO -177]
+
+6) reduce sea ice and polar bear
+http://localhost:8983/solr/select?q=text:polar%20bear%20AND%20text:reduce%20AND%20text:sea%20ice&fl=id,url,title,boost
+
+7) reduce sea ice and high temperature
+http://localhost:8983/solr/select?q=text:%22high%20temperature%22~1%20AND%20text:%22sea%20ice%22~1&fl=id,url,title,boost
+
+8)
