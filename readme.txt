@@ -34,4 +34,19 @@ mv to solr directory.
     for example, java TFIDF nutch/dump/ "oil extraction"
 
 
+3) Running queries
+------------------
+One can run queries using SolrjSearcher.java 
+
+    a) compile
+    ----------
+    javac SolrjSearcher.java
+
+    b) running
+    ----------
+    java SolrjSearcher "<query>"
+    for example java SolrjSearcher "text:arctic and ((text:"oil exploration"~10) or (text:"iron") or (text:oil))"
+    <query> - should be a valid solr query
+   
+    Note: We have not implemented adding fields, restricting rows and other features in this java implementation
 
