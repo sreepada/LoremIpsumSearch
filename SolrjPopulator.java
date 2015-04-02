@@ -252,7 +252,7 @@ public class SolrjPopulator {
         writer.close();
 
         try{
-            ProcessBuilder pb = new ProcessBuilder("python","pagerank.py");
+            ProcessBuilder pb = new ProcessBuilder("python","pagerank.py temp.txt");
             Process p = pb.start();
 
             BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));

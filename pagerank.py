@@ -1,10 +1,10 @@
 import networkx as nx
-
+import sys
 
 D = nx.DiGraph()
 
 ltpl = list()
-with open('../temp.txt','r') as fp:
+with open(sys.argv[1], 'r') as fp:
 	for line in fp:
 		frm,to,w = line.split(' ',3)
 		tpl = (frm,to,float(w))
