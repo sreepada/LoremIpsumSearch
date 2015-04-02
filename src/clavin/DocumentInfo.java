@@ -1,5 +1,3 @@
-package clavin;
-
 import java.util.HashMap;
 import java.util.Map;
 
