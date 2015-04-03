@@ -55,4 +55,12 @@ One can run queries using SolrjSearcher.java
     <query> - should be a valid solr query
    
     Note: We have not implemented adding fields, restricting rows and other features in this java implementation
+    
+4) [Extra Credit] ScoringFilter plugin for Nutch
+------------------------------------------------
+cp scoring-pagerank nutch/src/plugins
+ant runtime
+add "scoring-pagerank" in plugins.include property in nutch-site.xml
+
+
 
