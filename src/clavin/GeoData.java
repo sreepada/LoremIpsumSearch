@@ -1,5 +1,3 @@
-package clavin;
-
 public class GeoData {
 	String geoName;
 	double latitude;

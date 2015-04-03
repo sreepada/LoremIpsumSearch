@@ -1,5 +1,3 @@
-package clavin;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -98,7 +96,7 @@ public class LocationExtractor {
 		BodyContentHandler handler =  new BodyContentHandler(2147483647);
         FileInputStream is = new FileInputStream(file);
         parser.parse(is, handler, metaData, parseContext);
-        System.out.println("Content: "+ handler.toString());
+        
         return handler.toString();
 	}
 

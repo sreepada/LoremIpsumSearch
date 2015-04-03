@@ -1,5 +1,3 @@
-package clavin;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,10 +33,22 @@ public class DocumentInfo {
 		{
 			double tf = 0.5 + ((0.5*wordCount.get(word))/maxFreq);
 			
-			double idf= (double)numberOfDocs/(1+IDF.get(word));
+			double idf= Math.log((double)numberOfDocs/(1+IDF.get(word)));
 			
 			this.tfidf.put(word, tf*idf);
 		}
 	}
+	
+	double getTFIDFValue(String word)
+	{
+		double val=0.0;
+		
+		if(this.tfidf.containsKey(word))
+			val = this.tfidf.get(word);
+		return val;
+	}
+	
+	
+
 
 }
