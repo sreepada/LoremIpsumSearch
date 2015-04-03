@@ -17,7 +17,13 @@ mv to solr directory.
     cd ../../
     javac *.java
 
-    c) java SolrjPopulator <segment_path> <linkdb_data_path> <content_dump_dir>
+    c) Install python-networkx
+    —-------------------------
+    Using pip: pip install python-networkx
+    Manual: download networkx from https://pypi.python.org/pypi/networkx/
+            run $python setup.py install
+
+    d) java SolrjPopulator <segment_path> <linkdb_data_path> <content_dump_dir>
        Note that segment_path : path till data file
                  similarly for linkdb
                  content_dump_dir : directory containing all the files using bin/nutch dump
