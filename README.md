@@ -10,3 +10,6 @@ to delete solr indexes completely:
 curl  http://localhost:8983/solr/update -H "Content-Type: text/xml" --data-binary '<delete><query>*:*</query></delete>'
 curl  http://localhost:8983/solr/update?commit=true -d  '<commit />'
 curl http://localhost:8983/solr/update?commit=true -d  '<optimize />'
+
+
+export CLASSPATH="<lucene\_root>/lucene/replicator/lib/\*:<nutch\_root>/build/\*:<nutch\_root>/build/lib/\*:<lucene\_root>/solr/dist/\*:<lucene\_root>/solr/dist/solrj-lib/\*:\*:."
