@@ -26,6 +26,8 @@
       <library name="scoring-pagerank.jar">
          <export name="*"/>
       </library>
+        <library name="clavin-2.0.0.jar"/>
+        <library name="tika-app-1.7.jar"/>
    </runtime>
 
    <extension id="org.apache.nutch.scoring.pagerank"

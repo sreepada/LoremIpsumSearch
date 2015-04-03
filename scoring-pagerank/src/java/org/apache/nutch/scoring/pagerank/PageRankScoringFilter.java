@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.nutch.scoring.opic;
+package org.apache.nutch.scoring.pagerank;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -51,6 +51,7 @@ public class PageRankScoringFilter implements ScoringFilter {
   private float externalScoreFactor;
   private float keywordScoreFactor;
   private boolean countFiltered;
+  private LocationExtractor extractor = null;
 
   public Configuration getConf() {
     return conf;
@@ -63,6 +64,14 @@ public class PageRankScoringFilter implements ScoringFilter {
     externalScoreFactor = conf.getFloat("db.score.link.external", 1.0f);
     keywordScoreFactor = conf.getFloat("db.score.science.keywords", 1.0f);
     countFiltered = conf.getBoolean("db.score.count.filtered", false);
+    try
+    {
+        extractor = new LocationExtractor("IndexingDir");
+    }
+    catch(Exception e)
+    {
+        extractor = null;
+    }
   }
 
   public void injectedScore(Text url, CrawlDatum datum)
@@ -99,6 +108,22 @@ public class PageRankScoringFilter implements ScoringFilter {
 
   /** Store a float value of CrawlDatum.getScore() under Fetcher.SCORE_KEY. */
   public void passScoreBeforeParsing(Text url, CrawlDatum datum, Content content) {
+      String location = null;
+      try
+      {
+        List<GeoData> locations = extractor.getLocationInfoFromStirng(content.getContent().toString());
+        location = "";
+        for(GeoData geo: locations)
+        {
+            location += geo.getGeoName();
+        }
+        content.getMetadata().set("location_s", location);
+      }
+      catch(Exception e)
+      {
+          location = null;
+
+      }
     content.getMetadata().set(Nutch.SCORE_KEY, "" + datum.getScore());
   }
 
@@ -106,6 +131,11 @@ public class PageRankScoringFilter implements ScoringFilter {
   public void passScoreAfterParsing(Text url, Content content, Parse parse) {
     parse.getData().getContentMeta()
         .set(Nutch.SCORE_KEY, content.getMetadata().get(Nutch.SCORE_KEY));
+    String location = content.getMetadata().get("location_s");
+    if(location != null)
+    {
+        parse.getData().getParseMeta().set("location_s", location);
+    }
   }
 
   /**
@@ -116,6 +146,14 @@ public class PageRankScoringFilter implements ScoringFilter {
       ParseData parseData, Collection<Entry<Text, CrawlDatum>> targets,
       CrawlDatum adjust, int allCount) throws ScoringFilterException {
     float score = scoreInjected;
+    String location = parseData.getMeta("location_s");
+    if(location != null)
+    {
+        for (Entry<Text, CrawlDatum> target : targets) {
+            target.getValue().getMetaData().put(new Text("location_s"), new Text(location));
+        }
+
+    }
     String scoreString = parseData.getContentMeta().get(Nutch.SCORE_KEY);
     if (scoreString != null) {
       try {

@@ -79,6 +79,18 @@ public class SolrjPopulator {
             System.exit(0);
         }
 
+        LocationExtractor extractor = null;
+
+        try
+        {
+            extractor = new LocationExtractor("IndexDirectory");
+        }
+        catch(Exception e)
+        {
+            System.out.println("clavin directory not found. Please download index from git repo");
+        }
+
+
         Map<String, String> urlDidMap = new HashMap<String, String>();
         ArrayList<pageRankUrl> graph = new ArrayList<pageRankUrl>();
         ArrayList<linkNode> linkGraph = new ArrayList<linkNode>();
@@ -136,6 +148,26 @@ public class SolrjPopulator {
             catch(NullPointerException e) {
                 System.out.println("ullaasdfasdf");
                 continue;
+            }
+
+            try
+            {
+                if(extractor != null)
+                {
+                    List<GeoData>  location_list = extractor.getLocationInfoFromFile(files[i]);
+                    String location = "";
+                    for(GeoData gd: location_list)
+                    {
+                        location += gd.getGeoName() + ",";
+                        up.setParam("literal.lat_coordiante", Double.toString(gd.getLatitide()));
+                        up.setParam("literal.lon_coordiante", Double.toString(gd.getLongitutde()));
+                    }
+                    up.setParam("literal.clavin_location_s", location.substring(0, location.length() - 1));
+                }
+            }
+            catch(Exception e)
+            {
+
             }
             up.setParam("literal.id", currDocID);
             up.setParam("id", currDocID);
