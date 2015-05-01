@@ -90,7 +90,6 @@ public class SolrjPopulator {
             System.out.println("clavin directory not found. Please download index from git repo");
         }
 
-
         Map<String, String> urlDidMap = new HashMap<String, String>();
         ArrayList<pageRankUrl> graph = new ArrayList<pageRankUrl>();
         ArrayList<linkNode> linkGraph = new ArrayList<linkNode>();
@@ -158,15 +157,14 @@ public class SolrjPopulator {
                     String location = "";
                     for(GeoData gd: location_list)
                     {
-                        location += gd.getGeoName() + ",";
-                        up.setParam("literal.lat_coordiante", Double.toString(gd.getLatitide()));
-                        up.setParam("literal.lon_coordiante", Double.toString(gd.getLongitutde()));
+                        location += gd.getGeoName()+ "==" + Double.toString(gd.getLatitude()) + "==" +  Double.toString(gd.getLongitude()) + ",";
                     }
                     up.setParam("literal.clavin_location_s", location.substring(0, location.length() - 1));
                 }
             }
             catch(Exception e)
             {
+                System.out.println("");
 
             }
             up.setParam("literal.id", currDocID);
@@ -198,6 +196,12 @@ public class SolrjPopulator {
                     bboxValues[1] = Double.parseDouble(value.trim().split(" ")[0]);
                 else
                     up.setParam("literal." + key, value);
+
+                if(key.equals("date_created_s"))
+                {
+                    System.out.println("year=" + value.trim().split("-")[0]);
+                    up.setParam("literal.year_created_s", value.trim().split("-")[0]);
+                }
             }
             if (bboxValues[0] != null) {
                 up.setParam("literal.bbox", "ENVELOPE(" + bboxValues[0] + ", "
@@ -284,7 +288,7 @@ public class SolrjPopulator {
         writer.close();
 
         try{
-            ProcessBuilder pb = new ProcessBuilder("python","pagerank.py temp.txt");
+            ProcessBuilder pb = new ProcessBuilder("python","pagerank.py");
             Process p = pb.start();
 
             BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
